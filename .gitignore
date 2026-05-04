@@ -1,0 +1,42 @@
+# Build output
+bin/
+obj/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userprefs
+
+# Logs
+*.log
+
+# Cache / temp
+*.cache
+
+# Debug symbols
+*.pdb
+
+# Rider / VS Code (optional but safe)
+.idea/
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# ASP.NET Core
+appsettings.Development.json
+
+# MAUI / Xamarin
+*.keystore
+*.jks
+*.apk
+*.aab
+
+# NuGet
+*.nupkg
+packages/
+
+# Test results
+TestResults/
