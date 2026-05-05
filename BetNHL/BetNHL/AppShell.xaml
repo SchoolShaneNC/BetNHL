@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    x:Class="BetNHL.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:BetNHL.Views"
+    Shell.FlyoutBehavior="Flyout"
+    Title="BetNHL">
+
+    <ShellContent
+        Title="Dashboard"
+        ContentTemplate="{DataTemplate local:MainPage}"
+        Route="MainPage" />
+    <ShellContent
+      Title="Leaderboard"
+      ContentTemplate="{DataTemplate local:LeaderboardPage}"
+      Route="LeaderboardPage" />
+    <!--<ShellContent
+     Title="Game Details"
+     ContentTemplate="{DataTemplate local:GameDetailsPage}"
+     Route="GameDetailsPage" />-->
+
+</Shell>
+
+
+
+<!--<Shell
+    x:Class="BetNHL.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:views="clr-namespace:BetNHL.Views">
+
+ 
+
+</Shell>-->

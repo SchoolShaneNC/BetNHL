@@ -3,12 +3,12 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.12.35527.113 d17.12
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BetNHL", "..\BetNHLComplete\BetNHL\BetNHL\BetNHL.csproj", "{DD0E6085-3083-4250-9AD8-DC8DC8400F82}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BetNHL", "BetNHL\BetNHL\BetNHL.csproj", "{4F117ADD-B31B-431B-BCB9-1ADFBF1EC917}"
 	ProjectSection(ProjectDependencies) = postProject
-		{58BBA0B3-95F3-457F-9783-8684DE32E1F2} = {58BBA0B3-95F3-457F-9783-8684DE32E1F2}
+		{F193F601-9166-46D4-AB98-E89C48A22967} = {F193F601-9166-46D4-AB98-E89C48A22967}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BetNHL_Web_Api", "..\BetNHLComplete\BetNHL_Web_Api\BetNHL_Web_Api\BetNHL_Web_Api.csproj", "{58BBA0B3-95F3-457F-9783-8684DE32E1F2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BetNHL_Web_Api", "BetNHL_Web_Api\BetNHL_Web_Api\BetNHL_Web_Api.csproj", "{F193F601-9166-46D4-AB98-E89C48A22967}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -16,14 +16,15 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{DD0E6085-3083-4250-9AD8-DC8DC8400F82}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DD0E6085-3083-4250-9AD8-DC8DC8400F82}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DD0E6085-3083-4250-9AD8-DC8DC8400F82}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DD0E6085-3083-4250-9AD8-DC8DC8400F82}.Release|Any CPU.Build.0 = Release|Any CPU
-		{58BBA0B3-95F3-457F-9783-8684DE32E1F2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{58BBA0B3-95F3-457F-9783-8684DE32E1F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{58BBA0B3-95F3-457F-9783-8684DE32E1F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{58BBA0B3-95F3-457F-9783-8684DE32E1F2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4F117ADD-B31B-431B-BCB9-1ADFBF1EC917}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4F117ADD-B31B-431B-BCB9-1ADFBF1EC917}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4F117ADD-B31B-431B-BCB9-1ADFBF1EC917}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{4F117ADD-B31B-431B-BCB9-1ADFBF1EC917}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4F117ADD-B31B-431B-BCB9-1ADFBF1EC917}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F193F601-9166-46D4-AB98-E89C48A22967}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F193F601-9166-46D4-AB98-E89C48A22967}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F193F601-9166-46D4-AB98-E89C48A22967}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F193F601-9166-46D4-AB98-E89C48A22967}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

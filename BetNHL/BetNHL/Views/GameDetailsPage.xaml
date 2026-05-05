@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="BetNHL.Views.GameDetailsPage">
+
+    <Grid>
+
+        <!-- background -->
+        <Image Source="GreyIceTexture.jpg"
+               Aspect="AspectFill"
+               Opacity="0.85" />
+
+        <BoxView Color="Black" Opacity="0.35" />
+
+        <!-- whole container -->
+        <Grid Padding="10"
+              HorizontalOptions="Center">
+
+            <Border Stroke="{StaticResource GoldBorder}"
+                    StrokeThickness="2"
+                    BackgroundColor="{StaticResource PrimaryDark}"
+                    Padding="18"
+                    HorizontalOptions="Center"
+                    MaximumWidthRequest="850">
+
+                <Grid RowDefinitions="Auto,*"
+                      RowSpacing="14">
+
+                    <!-- team section -->
+                    <Frame Grid.Row="0"
+                           Padding="18"
+                           CornerRadius="12"
+                           BackgroundColor="{StaticResource Gray900}"
+                           BorderColor="{StaticResource GoldBorder}"
+                           MinimumHeightRequest="280">
+
+                        <Grid ColumnDefinitions="*,Auto,*"
+                              ColumnSpacing="14">
+
+                            <VerticalStackLayout Grid.Column="0"
+                                                 HorizontalOptions="Center"
+                                                 Spacing="6">
+
+                                <Image Source="{Binding HomeTeam.Logo}"
+                                       HeightRequest="60"
+                                       WidthRequest="60"
+                                       Aspect="AspectFit"/>
+
+                                <Label Text="{Binding HomeTeam.TeamName}"
+                                       TextColor="White"
+                                       FontSize="18"
+                                       FontAttributes="Bold"
+                                       HorizontalTextAlignment="Center"/>
+
+                                <Label Text="{Binding HomeTeam.Abbreviation}"
+                                       TextColor="#EAEAEA"
+                                       FontSize="14"
+                                       HorizontalTextAlignment="Center"/>
+
+                                <Label Text="{Binding HomeTeam.Wins, StringFormat='W {0}'}"
+                                       TextColor="#EAEAEA"
+                                       FontSize="14"/>
+
+                                <Label Text="{Binding HomeTeam.Losses, StringFormat='L {0}'}"
+                                       TextColor="#EAEAEA"
+                                       FontSize="14"/>
+
+                                <Label Text="{Binding HomeTeam.Otl, StringFormat='OTL {0}'}"
+                                       TextColor="#EAEAEA"
+                                       FontSize="14"/>
+
+                                <Label Text="{Binding HomeTeam.Points, StringFormat='{0} pts'}"
+                                       TextColor="White"
+                                       FontSize="14"/>
+
+                                <Label Text="{Binding HomeTeam.GoalDifferential, StringFormat='Goal Diff {0}'}"
+                                       TextColor="#EAEAEA"
+                                       FontSize="14"/>
+
+                                <Label Text="{Binding HomeTeam.PointsPercentage, StringFormat='PCT {0:P1}'}"
+                                       TextColor="White"
+                                       FontSize="14"/>
+
+                                <Button Text="Bet Home"
+                                        BackgroundColor="Gold"
+                                        TextColor="Black"
+                                        Command="{Binding OpenTeamBetCommand}"
+                                        CommandParameter="{Binding HomeTeam}" />
+
+                            </VerticalStackLayout>
+
+                            <Label Grid.Column="1"
+                                   Text="VS"
+                                   TextColor="{StaticResource GoldBorder}"
+                                   FontSize="20"
+                                   VerticalOptions="Center"
+                                   HorizontalOptions="Center"/>
+
+                            <VerticalStackLayout Grid.Column="2"
+                                                 HorizontalOptions="Center"
+                                                 Spacing="6">
+
+                                <Image Source="{Binding AwayTeam.Logo}"
+                                       HeightRequest="60"
+                                       WidthRequest="60"
+                                       Aspect="AspectFit"/>
+
+                                <Label Text="{Binding AwayTeam.TeamName}"
+                                       TextColor="White"
+                                       FontSize="18"
+                                       FontAttributes="Bold"
+                                       HorizontalTextAlignment="Center"/>
+
+                                <Label Text="{Binding AwayTeam.Abbreviation}"
+                                       TextColor="#EAEAEA"
+                                       FontSize="14"
+                                       HorizontalTextAlignment="Center"/>
+
+                                <Label Text="{Binding AwayTeam.Wins, StringFormat='W {0}'}"
+                                       TextColor="#EAEAEA"
+                                       FontSize="14"/>
+
+                                <Label Text="{Binding AwayTeam.Losses, StringFormat='L {0}'}"
+                                       TextColor="#EAEAEA"
+                                       FontSize="14"/>
+
+                                <Label Text="{Binding AwayTeam.Otl, StringFormat='OTL {0}'}"
+                                       TextColor="#EAEAEA"
+                                       FontSize="14"/>
+
+                                <Label Text="{Binding AwayTeam.Points, StringFormat='{0} pts'}"
+                                       TextColor="White"
+                                       FontSize="14"/>
+
+                                <Label Text="{Binding AwayTeam.GoalDifferential, StringFormat='Goal Diff {0}'}"
+                                       TextColor="#EAEAEA"
+                                       FontSize="14"/>
+
+                                <Label Text="{Binding AwayTeam.PointsPercentage, StringFormat='PCT {0:P1}'}"
+                                       TextColor="White"
+                                       FontSize="14"/>
+
+                                <Button Text="Bet Away"
+                                        BackgroundColor="Gold"
+                                        TextColor="Black"
+                                        Command="{Binding OpenTeamBetCommand}"
+                                        CommandParameter="{Binding AwayTeam}" />
+
+                            </VerticalStackLayout>
+
+                        </Grid>
+                    </Frame>
+
+                    <!-- player list -->
+                    <CollectionView Grid.Row="1"
+                                    ItemsSource="{Binding Players}"
+                                    SelectionMode="None">
+
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+
+                                <Frame Margin="4"
+                                        Padding="12"
+                                        CornerRadius="10"
+                                        BackgroundColor="{StaticResource Gray900}"
+                                        BorderColor="{StaticResource GoldBorder}">
+
+                                    <Grid ColumnDefinitions="Auto,2*,Auto,Auto"
+                                          ColumnSpacing="15"
+                                          VerticalOptions="Center">
+
+                                        <!-- teamlogo -->
+                                        <Image Grid.Column="0"
+                                           Source="{Binding TeamLogo}"
+                                           HeightRequest="49"
+                                           WidthRequest="49"
+                                           Aspect="AspectFit"
+                                           VerticalOptions="Center"/>
+
+                                        <!-- all other info-->
+                                        <HorizontalStackLayout Grid.Column="1"
+                                       Spacing="6"
+                                       VerticalOptions="Center">
+
+                                            <Label Text="{Binding DisplayName}"
+                                               TextColor="White"
+                                               FontAttributes="Bold"
+                                               FontSize="16"
+                                               LineBreakMode="TailTruncation"/>
+
+                                            <Label Text="•"
+                                               TextColor="#EAEAEA"
+                                               FontSize="12"
+                                               VerticalOptions="Center"/>
+
+                                            <Label Text="{Binding Position}"
+                                               TextColor="#EAEAEA"
+                                               FontSize="14"
+                                               VerticalOptions="Center"/>
+
+                                            <Label Text="•"
+                                               TextColor="#EAEAEA"
+                                               FontSize="12"
+                                               VerticalOptions="Center"/>
+
+                                            <Label Text="{Binding TeamAbbr}"
+                                               TextColor="#EAEAEA"
+                                               FontSize="14"
+                                               VerticalOptions="Center"/>
+
+                                            <Label Text="vs"
+                                               TextColor="Gray"
+                                               FontSize="14"
+                                               VerticalOptions="Center"/>
+
+                                            <Label Text="{Binding OppAbbr}"
+                                               TextColor="#EAEAEA"
+                                               FontSize="14"
+                                               VerticalOptions="Center"/>
+
+                                        </HorizontalStackLayout>
+
+                                        <!-- odds-->
+                                        <Label Grid.Column="2"
+                                           Text="{Binding ScoreOdds}"
+                                           TextColor="LightGreen"
+                                           FontAttributes="Bold"
+                                           FontSize="16"
+                                           VerticalOptions="Center"/>
+
+                                        <Button Grid.Column="3"
+                                            Text="Bet"
+                                            Padding="16"
+                                            FontSize="17"
+                                            BackgroundColor="{StaticResource GoldBorder}"
+                                            TextColor="Black"
+                                            CornerRadius="8"
+                                            MinimumWidthRequest="80"
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.OpenPlayerBetCommand}"
+                                            CommandParameter="{Binding .}" />
+
+                                    </Grid>
+
+                                </Frame>
+
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+
+                    </CollectionView>
+
+                </Grid>
+
+            </Border>
+
+        </Grid>
+
+    </Grid>
+
+</ContentPage>

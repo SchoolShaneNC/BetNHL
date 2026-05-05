@@ -1,0 +1,139 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="BetNHL.Views.MainPage">
+
+    <Grid>
+
+        <!-- background -->
+        <Image Source="GreyIceTexture.jpg"
+           Aspect="AspectFill"
+           Opacity="0.85" />
+
+        <BoxView Color="Black" Opacity="0.35" />
+
+        <!-- full container-->
+        <Grid Padding="10">
+
+            <Border Stroke="{StaticResource GoldBorder}"
+                StrokeThickness="2"
+                BackgroundColor="{StaticResource PrimaryDark}"
+                Padding="12"
+                HorizontalOptions="Fill"
+                VerticalOptions="Start"
+                MaximumWidthRequest="900">
+
+                <Grid RowDefinitions="Auto,Auto,*"
+                     RowSpacing="10">
+
+                    <Border Grid.Row="0"
+                        Stroke="{StaticResource Gray600}"
+                        StrokeThickness="2">
+
+                        <Image Source="NHLBannerIce.png"
+                            HeightRequest="{OnIdiom Phone=140, Tablet=180, Desktop=200}"
+                            Aspect="AspectFill" />
+
+                    </Border>
+
+                    <Label Grid.Row="1"
+                       Text="Games Today"
+                       FontSize="25"
+                       FontAttributes="Bold"
+                       HorizontalTextAlignment="Center"
+                       TextColor="{StaticResource White}" />
+
+                    <!-- all games collection -->
+                    <CollectionView Grid.Row="2"
+                        ItemsSource="{Binding Games}"
+                        SelectionMode="None">
+
+                        <CollectionView.ItemsLayout>
+                            <LinearItemsLayout Orientation="Vertical"
+                               ItemSpacing="10"/>
+                        </CollectionView.ItemsLayout>
+
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+
+                                <Frame Margin="8"
+                                   Padding="14"
+                                   CornerRadius="12"
+                                   BackgroundColor="{StaticResource Gray900}"
+                                   BorderColor="{StaticResource Gray600}"
+                                   HorizontalOptions="Fill">
+
+                                    <Grid ColumnDefinitions="Auto,*,Auto"
+                                        ColumnSpacing="20"
+                                        HorizontalOptions="Fill">
+
+                                        <Image Grid.Column="0"
+                                           Source="{Binding HomeLogo}"
+                                           WidthRequest="70"
+                                           HeightRequest="70"
+                                           Aspect="AspectFit"
+                                           VerticalOptions="Center"/>
+
+                                        <VerticalStackLayout Grid.Column="1"
+                                             Spacing="4"
+                                             HorizontalOptions="Center"
+                                             VerticalOptions="Center">
+
+                                            <Label FontSize="16"
+                                               TextColor="White"
+                                               HorizontalTextAlignment="Center">
+                                                <Label.FormattedText>
+                                                    <FormattedString>
+                                                        <Span Text="{Binding HomeDisplayOdds}" TextColor="LightGreen"/>
+                                                        <Span Text="  "/>
+                                                        <Span Text="{Binding HomeTeamAbbr}" FontAttributes="Bold"/>
+                                                        <Span Text=" vs "/>
+                                                        <Span Text="{Binding AwayTeamAbbr}" FontAttributes="Bold"/>
+                                                        <Span Text="  "/>
+                                                        <Span Text="{Binding AwayDisplayOdds}" TextColor="LightGreen"/>
+                                                    </FormattedString>
+                                                </Label.FormattedText>
+                                            </Label>
+
+                                            <Label Text="{Binding StartTime}"
+                                                FontSize="12"
+                                                TextColor="{StaticResource Gray300}"
+                                                HorizontalTextAlignment="Center"/>
+
+                                            <Button Text="View / Bet"
+                                                BackgroundColor="{StaticResource GoldBorder}"
+                                                TextColor="Black"
+                                                FontAttributes="Bold"
+                                                CornerRadius="12"
+                                                HorizontalOptions="Center"
+                                                WidthRequest="160"
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.GoToGameCommand}"
+                                                CommandParameter="{Binding GameId}" />
+
+                                        </VerticalStackLayout>
+
+                                        <Image Grid.Column="2"
+                                           Source="{Binding AwayLogo}"
+                                           WidthRequest="70"
+                                           HeightRequest="70"
+                                           Aspect="AspectFit"
+                                           VerticalOptions="Center"/>
+
+                                    </Grid>
+
+                                </Frame>
+
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+
+                    </CollectionView>
+
+                </Grid>
+
+            </Border>
+
+        </Grid>
+
+    </Grid>
+
+</ContentPage>
