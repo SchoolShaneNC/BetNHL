@@ -1,0 +1,49 @@
+<toolkit:Popup
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+    x:Class="BetNHL.Views.BetPopup">
+
+    <Frame Padding="24"
+           WidthRequest="350"
+           MaximumWidthRequest="400"
+           CornerRadius="12"
+           BackgroundColor="{StaticResource PrimaryDark}"
+           BorderColor="{StaticResource GoldBorder}"
+           HorizontalOptions="Center">
+
+        <VerticalStackLayout Spacing="14">
+
+            <Label Text="Place Bet"
+                   FontSize="20"
+                   TextColor="White"
+                   HorizontalOptions="Center"/>
+
+            <Label Text="{Binding DisplayName}"
+                   TextColor="White"
+                   FontAttributes="Bold"
+                   HorizontalOptions="Center"/>
+
+            <Label Text="{Binding ScoreOdds}"
+                   TextColor="LightGreen"
+                   HorizontalOptions="Center"/>
+
+            <Entry Placeholder="Bet Amount"
+                   Keyboard="Numeric"
+                   TextColor="White"
+                   Text="{Binding AmountBet}" />
+
+            <Button Text="Confirm Bet"
+                    BackgroundColor="{StaticResource GoldBorder}"
+                    TextColor="Black"
+                    Clicked="OnConfirm"/>
+
+            <Button Text="Cancel"
+                    Clicked="OnClose"
+                    BackgroundColor="Transparent"
+                    TextColor="Gray"/>
+
+        </VerticalStackLayout>
+
+    </Frame>
+</toolkit:Popup>

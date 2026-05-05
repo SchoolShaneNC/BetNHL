@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage 
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Class="BetNHL.Views.Register"
+    BackgroundColor="{StaticResource Primary}">
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="1*" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <!-- background -->
+        <Image 
+            Source="NhlWideBackground.jpg"
+            Aspect="AspectFill"
+            Opacity="0.82"
+            Grid.ColumnSpan="3"/>
+
+        <!-- main container -->
+        <Border
+            Stroke="{StaticResource GoldBorder}"
+            Grid.Column="1" 
+            StrokeThickness="2"
+            BackgroundColor="{StaticResource PrimaryDark}"
+            Padding="20"
+            MaximumWidthRequest="600"
+            HorizontalOptions="Fill"            
+            VerticalOptions="Center">
+
+            <VerticalStackLayout
+                BackgroundColor="{StaticResource PrimaryDark}"
+                Spacing="28"
+                MaximumWidthRequest="600"
+                HorizontalOptions="Fill"
+                VerticalOptions="Center">
+
+                <Label 
+                    Text="Register"
+                    TextColor="{StaticResource PrimaryDarkText}" 
+                    FontSize="32"
+                    HorizontalOptions="Center" />
+
+                <Entry 
+                    Placeholder="Username"
+                    TextColor="{StaticResource PrimaryDarkText}"
+                    Text="{Binding Username}" />
+
+                <Entry 
+                    Placeholder="Password"
+                    TextColor="{StaticResource PrimaryDarkText}"
+                    IsPassword="True"
+                    Text="{Binding Password}" />
+
+                <Entry 
+                    Placeholder="Confirm Password"
+                    TextColor="{StaticResource PrimaryDarkText}"
+                    IsPassword="True"
+                    Text="{Binding ConfirmPassword}" />
+
+                <Button 
+                    Text="Create Account"
+                    TextColor="{StaticResource PrimaryDarkText}"
+                    BorderColor="{StaticResource GoldBorder}"
+                    BorderWidth="2"
+                    Command="{Binding RegisterCommand}" 
+                    MaximumWidthRequest="245"/>
+
+                <HorizontalStackLayout HorizontalOptions="Center" Spacing="5">
+
+                    <Label 
+                        Text="Already have an account?"
+                        TextColor="{StaticResource Secondary}" />
+
+                    <Label 
+                        Text="Login"
+                        TextColor="{StaticResource GoldBorder}"
+                        FontAttributes="Bold">
+
+                        <Label.GestureRecognizers>
+                            <TapGestureRecognizer 
+                                Command="{Binding GoToLoginCommand}" />
+                        </Label.GestureRecognizers>
+
+                    </Label>
+
+                </HorizontalStackLayout>
+
+            </VerticalStackLayout>
+        </Border>
+
+    </Grid>
+
+</ContentPage>

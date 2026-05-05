@@ -1,0 +1,23 @@
+﻿Install-Package Microsoft.EntityFrameworkCore.Sqlite -v 9.0.11
+
+Install-Package Microsoft.EntityFrameworkCore.Tools -v 9.0.11
+
+-----------------------------------------------------------------
+
+Swagger Setup:
+
+Install-Package Swashbuckle.AspNetCore -v 9.0.6
+
+-----------------------------------------------------------------
+
+Add Migrations and Update the Database:
+
+Add-Migration -Context BetNHLContext -o Data\MOMigrations Initial
+
+Update-Database -Context BetNHLContext 
+
+
+
+Auth stuff fer deployment
+setx JWT__KEY "SUPER_SECRET_PROD_KEY"
+dotnet user-secrets set "Jwt:Key" "SUPER_SECRET_PROD_KEY"
