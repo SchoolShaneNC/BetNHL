@@ -1,15 +1,11 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using BetNHL_Web_Api.Data;
+using BetNHL_Web_Api.Helpers;
+using BetNHL_Web_Api.Models;
+using BetNHL_Web_Api.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using BetNHL_Web_Api.Data;
-using BetNHL_Web_Api.Models;
-using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
-using System.Diagnostics.Metrics;
-using System.Threading.Channels;
-using BetNHL_Web_Api.Services;
 
 namespace BetNHL_Web_Api.Controllers
 {
@@ -19,474 +15,229 @@ namespace BetNHL_Web_Api.Controllers
     public class BetController : ControllerBase
     {
         private readonly BetNHLContext _context;
-        //   private readonly NhlService _nhlService; old circular
         private readonly INhlService _nhlService;
         private readonly IOddsService _oddsService;
-        public BetController(BetNHLContext context, IOddsService oddsService, INhlService nhlService)
+
+        public BetController(
+            BetNHLContext context,
+            INhlService nhlService,
+            IOddsService oddsService)
         {
             _context = context;
-            _oddsService = oddsService;
             _nhlService = nhlService;
+            _oddsService = oddsService;
         }
 
         // GET: api/Bet
-        [Authorize]
         [HttpGet]
-        public async Task<ActionResult<List<BetDTO>>> GetBets()
+        public async Task<ActionResult<IEnumerable<ParlayDTO>>> GetParlays()
         {
-            var betDTOs = await _context.Bets
-                 .Include(b => b.User)
-                 .Select(b => new BetDTO
-                {
-                    ID = b.ID,
-                    DatePlaced = b.DatePlaced,
-                    AmountBet = b.AmountBet,
-                    Odds = b.Odds,
-                    Won = b.Won,
-                    GameId = b.GameId,
-                    Type = b.Type,
-                    TeamPickedID = b.TeamPickedID,
-                    PlayerPickedID = b.PlayerPickedID,
-                    UserID = b.UserID,
-                    Username = b.User.UserName
-
-                })
+            var parlays = await _context.Parlays
+                .Include(p => p.User)
+                .Include(p => p.Legs)
+                .OrderByDescending(p => p.DatePlaced)
                 .ToListAsync();
 
-            if (betDTOs.Count == 0)
-                return NotFound(new { message = "No betting records found." });
+            var dto = parlays
+                .Select(DTOMapper.MapParlayDTO)
+                .ToList();
 
-            return betDTOs;
+            return Ok(dto);
         }
 
         // GET: api/Bet/5
-        [Authorize]
         [HttpGet("{id}")]
-        public async Task<ActionResult<BetDTO>> GetBet(int id)
+        public async Task<ActionResult<ParlayDTO>> GetParlay(int id)
         {
-            var betDTO = await _context.Bets
-                .Include(b => b.User)
-                .Select(b => new BetDTO
-                {
-                    ID = b.ID,
-                    DatePlaced = b.DatePlaced,
-                    AmountBet = b.AmountBet,
-                    Odds = b.Odds,
-                    Won = b.Won,
-                    GameId = b.GameId,
-                    Type = b.Type,
-                    TeamPickedID = b.TeamPickedID,
-                    PlayerPickedID = b.PlayerPickedID,
-                    UserID = b.UserID,
-                    Username = b.User.UserName
+            var parlay = await _context.Parlays
+                .Include(p => p.User)
+                .Include(p => p.Legs)
+                .FirstOrDefaultAsync(p => p.Id == id);
 
-                })
-                .FirstOrDefaultAsync(b => b.ID == id);
-
-            if (betDTO == null)
+            if (parlay == null)
                 return NotFound();
 
-            return betDTO;
+            return Ok(DTOMapper.MapParlayDTO(parlay));
         }
 
+        // GET: api/Bet/user/{userId}
         [HttpGet("user/{userId}")]
-        public async Task<ActionResult<List<BetDTO>>> GetBetsByUser(string userId)
+        public async Task<ActionResult<IEnumerable<ParlayDTO>>> GetParlaysByUser(string userId)
         {
-            var bets = await _context.Bets
-                .Where(b => b.UserID == userId)
-                .Select(b => new BetDTO
-                {
-                    ID = b.ID,
-                    DatePlaced = b.DatePlaced,
-                    AmountBet = b.AmountBet,
-                    Odds = b.Odds,
-                    Won = b.Won,
-                    GameId = b.GameId,
-                    Type = b.Type,
-                    TeamPickedID = b.TeamPickedID,
-                    PlayerPickedID = b.PlayerPickedID,
-                })
+            var parlays = await _context.Parlays
+                .Include(p => p.User)
+                .Include(p => p.Legs)
+                .Where(p => p.UserId == userId)
+                .OrderByDescending(p => p.DatePlaced)
                 .ToListAsync();
 
-            if (!bets.Any()) return NotFound("No bets found for this user.");
-            return Ok(bets);
+            if (!parlays.Any())
+                return NotFound("No parlays found for this user.");
+
+            var dto = parlays
+                .Select(DTOMapper.MapParlayDTO)
+                .ToList();
+
+            return Ok(dto);
         }
 
+        // GET: api/Bet/unresolved
         [HttpGet("unresolved")]
-        public async Task<ActionResult<List<BetDTO>>> GetUnresolvedBets()
+        public async Task<ActionResult<IEnumerable<ParlayDTO>>> GetUnresolvedParlays()
         {
-            var bets = await _context.Bets
-                .Where(b => b.Won == null)
-                .Select(b => new BetDTO
-                {
-                    ID = b.ID,
-                    DatePlaced = b.DatePlaced,
-                    AmountBet = b.AmountBet,
-                    Odds = b.Odds,
-                    GameId = b.GameId,
-                    Type = b.Type,
-                    TeamPickedID = b.TeamPickedID,
-                    PlayerPickedID = b.PlayerPickedID
-                })
+            var parlays = await _context.Parlays
+                .Include(p => p.User)
+                .Include(p => p.Legs)
+                .Where(p => p.Won == null)
                 .ToListAsync();
 
-            return Ok(bets);
+            var dto = parlays
+                .Select(DTOMapper.MapParlayDTO)
+                .ToList();
+
+            return Ok(dto);
         }
 
-        // PUT: api/Bet/5
-//       
-        [Authorize]
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutBet(int id, Bet bet)
+        // GET: api/Bet/unresolved/me
+        [HttpGet("unresolved/me")]
+        public async Task<ActionResult<IEnumerable<ParlayDTO>>> GetMyUnresolvedParlays()
         {
-            if (id != bet.ID)
-                return BadRequest();
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            _context.Entry(bet).State = EntityState.Modified;
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!BetExists(id))
-                    return NotFound();
-                throw;
-            }
+            var parlays = await _context.Parlays
+                .Include(p => p.User)
+                .Include(p => p.Legs)
+                .Where(p => p.UserId == userId && p.Won == null)
+                .ToListAsync();
 
-            return NoContent();
+            var dto = parlays
+                .Select(DTOMapper.MapParlayDTO)
+                .ToList();
+
+            return Ok(dto);
         }
 
-
-        [Authorize]
+        // POST: api/Bet
         [HttpPost]
-        public async Task<IActionResult> PostBet(CreateBetDTO dto)
+        public async Task<IActionResult> PostParlay(CreateParlayDTO dto)
         {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
 
             var user = await _context.Users.FindAsync(userId);
+
             if (user == null)
                 return Unauthorized();
 
-            if (user.Balance < dto.AmountBet)
-                return BadRequest("Insufficient balance for this bet");
+            if (dto.Legs == null || !dto.Legs.Any())
+                return BadRequest("Parlay requires at least one leg.");
 
-            decimal odds;
+            if (user.Balance < dto.Stake)
+                return BadRequest("Insufficient balance.");
 
-            if (dto.Type == BetType.TeamWin)
+            var parlayLegs = new List<ParlayLeg>();
+
+            foreach (var legDto in dto.Legs)
             {
-                var game = await _nhlService.GetGameByIDAsync(dto.GameId);
+                decimal odds;
 
-                var homeAbbrev = game.HomeTeam.Abbreviation;
-                var awayAbbrev = game.AwayTeam.Abbreviation;
-
-                var picked = dto.TeamPickedAbbr;
-
-                if (string.IsNullOrEmpty(picked))
+                try
                 {
-                    picked = game.HomeTeam.Id == dto.TeamPickedID
-                        ? homeAbbrev
-                        : awayAbbrev;
+                    odds =  _oddsService.CalculateLegOdds(legDto);
+                }
+                catch (Exception ex)
+                {
+                    return BadRequest($"Failed calculating odds: {ex.Message}");
                 }
 
-                var standings = await _nhlService.GetStandingsAsync();
+                var leg = new ParlayLeg
+                {
+                    Category = legDto.Category,
+                    Metric = legDto.Metric,
+                    Condition = legDto.Condition,
+                    Context = legDto.Context,
 
-                odds = _oddsService.CalculateTeamWinOdds(
-                    standings,
-                    homeAbbrev,
-                    awayAbbrev,
-                    picked
-                );
+                    GameId = legDto.GameId,
+
+                    TeamPickedID = legDto.TeamPickedID,
+                    PlayerPickedID = legDto.PlayerPickedID,
+
+                    Line = legDto.Line,
+
+                    Odds = odds
+                };
+
+                parlayLegs.Add(leg);
             }
-            else
+
+            var combinedOdds = _oddsService.CalculateCombinedParlayOdds(
+                    parlayLegs.Select(l => l.Odds).ToList());
+
+            var potentialPayout = dto.Stake * combinedOdds;
+
+            var parlay = new Parlay
             {
-                var player = await _nhlService.GetPlayerAsync(dto.PlayerPickedID.Value);
-                var stats = await _nhlService.GetPlayerStatsAsync(dto.PlayerPickedID.Value);
+                UserId = userId,
 
-                odds = _oddsService.CalculatePlayerGoalOdds(player, stats);
-            }
-
-
-
-            var bet = new Bet
-            {
                 DatePlaced = DateTime.UtcNow,
-                AmountBet = dto.AmountBet,
-                Odds = odds,
-                GameId = dto.GameId,
-                Type = dto.Type,
-                TeamPickedID = dto.TeamPickedID,
-                PlayerPickedID = dto.PlayerPickedID,
-                UserID = userId
+
+                Stake = dto.Stake,
+
+                CombinedOdds = combinedOdds,
+                PotentialPayout = potentialPayout,
+
+                Won = null,
+
+                Legs = parlayLegs
             };
 
-            user.Balance -= dto.AmountBet;
-            user.TotalMoneyBet += dto.AmountBet;
+            user.Balance -= dto.Stake;
+            user.TotalMoneyBet += dto.Stake;
 
-            _context.Bets.Add(bet);
-            await _context.SaveChangesAsync();
-
-            return Ok(new
-            {
-              
-                betId = bet.ID,
-                newBalance = user.Balance,
-                oddsDecimal = bet.Odds,
-                oddsAmerican = _oddsService.ConvertToDisplayOdds(bet.Odds)
-               
-            });
-        }
-
-        [Authorize]
-        [HttpPost("resolve/user")]
-        public async Task<IActionResult> ResolveUserBets()
-        {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-
-            var bets = await _context.Bets
-                .Include(b => b.User)
-                .Where(b => b.UserID == userId && b.Won == null)
-                .ToListAsync();
-
-            if (!bets.Any())
-                return Ok(new { message = "No unresolved bets" });
-
-            var betsByGame = bets.GroupBy(b => b.GameId).ToList();
-
-
-            int resolvedCount = 0;
-
-            foreach (var group in betsByGame)
-            {
-                var game = await _nhlService.FetchGameResultsByID(group.Key);
-
-                //Skip if game not finished
-                if (game.GameState != "OFF")
-                    continue;
-
-                // Determine winning team
-                var winningTeamId = game.HomeTeam.Score > game.AwayTeam.Score
-                    ? game.HomeTeam.Id
-                    : game.AwayTeam.Id;
-
-                //Get all goal scorers 
-                var goalScorers = game.Summary.Scoring
-                    .SelectMany(p => p.Goals)
-                    .Select(g => g.PlayerId)
-                    .ToList();
-
-                foreach (var bet in group)
-                {
-                    bool isWin = false;
-
-                    if (bet.Type == BetType.TeamWin)
-                    {
-                        isWin = bet.TeamPickedID == winningTeamId;
-                    }
-                    else if (bet.Type == BetType.PlayerGoal)
-                    {
-                        isWin = bet.PlayerPickedID.HasValue &&
-                                goalScorers.Contains(bet.PlayerPickedID.Value);
-                    }
-
-                    bet.Won = isWin;
-
-                    if (isWin)
-                    {
-                        var payout = bet.AmountBet * bet.Odds;
-
-                        bet.User.Balance += payout;
-                        bet.User.BetsWon++;
-                        bet.User.TotalMoneyWon += payout;
-                    }
-                    else
-                    {
-                        bet.User.BetsLost++;
-                        bet.User.TotalMoneyLost += bet.AmountBet;
-                    }
-
-                    resolvedCount++;
-                }
-            }
+            _context.Parlays.Add(parlay);
 
             await _context.SaveChangesAsync();
 
             return Ok(new
             {
-                message = "User bets processed",
-                resolvedBets = resolvedCount
+                parlayId = parlay.Id,
+
+                combinedOddsDecimal = combinedOdds,
+
+                combinedOddsAmerican =
+                    _oddsService.ConvertToDisplayOdds(combinedOdds),
+
+                potentialPayout,
+
+                newBalance = user.Balance
             });
         }
-
-
 
         // DELETE: api/Bet/5
-        [Authorize]
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteBet(int id)
+        public async Task<IActionResult> DeleteParlay(int id)
         {
-            var bet = await _context.Bets.FindAsync(id);
-            if (bet == null)
+            var parlay = await _context.Parlays
+                .FirstOrDefaultAsync(p => p.Id == id);
+
+            if (parlay == null)
                 return NotFound();
 
-            _context.Bets.Remove(bet);
+            _context.Parlays.Remove(parlay);
+
             await _context.SaveChangesAsync();
 
             return NoContent();
         }
 
-        private bool BetExists(int id)
+        private bool ParlayExists(int id)
         {
-            return _context.Bets.Any(e => e.ID == id);
+            return _context.Parlays.Any(p => p.Id == id);
         }
     }
 }
-
-
-//using System;
-//using System.Collections.Generic;
-//using System.Linq;
-//using System.Threading.Tasks;
-//using Microsoft.AspNetCore.Http;
-//using Microsoft.AspNetCore.Mvc;
-//using Microsoft.EntityFrameworkCore;
-//using BetNHL_Web_Api.Data;
-//using BetNHL_Web_Api.Models;
-
-//namespace BetNHL_Web_Api.Controllers
-//{
-//    [Route("api/[controller]")]
-//    [ApiController]
-//    public class BetController : ControllerBase
-//    {
-//        private readonly BetNHLContext _context;
-
-//        public BetController(BetNHLContext context)
-//        {
-//            _context = context;
-//        }
-
-//        // GET: api/Bet
-//        [HttpGet]
-//        public async Task<ActionResult<List<BetDTO>>> GetBet()
-//        {
-//            var betDTOs = await _context.Bets
-//                .Select(b => new BetDTO
-//                {
-//                    ID = b.ID,
-//                    DatePlaced = b.DatePlaced,
-//                    AmountBet = b.AmountBet,
-//                    Odds = b.Odds,
-//                    Won = b.Won,
-//                    GameId = b.GameId,
-//                    Type = b.Type,
-//                    TeamPickedID = b.TeamPickedID,
-//                    PlayerPickedID = b.PlayerPickedID,
-//                    UserId = b.UserId
-//                })
-//                .ToListAsync();
-
-//            if (betDTOs.Count() > 0)
-//            {
-//                return betDTOs;
-//            }
-//            else
-//            {
-//                return NotFound(new { message = "Error: No betting records found in the database." });
-//            }
-//        }
-
-//        // GET: api/Bet/5
-//        [HttpGet("{id}")]
-//        public async Task<ActionResult<BetDTO>> GetBet(int id)
-//        {
-//            //getting singular member 
-//            var betDTO = await _context.Bets
-//                     .Select(b => new BetDTO
-//                     {
-//                         ID = b.ID,
-//                         DatePlaced = b.DatePlaced,
-//                         AmountBet = b.AmountBet,
-//                         Odds = b.Odds,
-//                         Won = b.Won,
-//                         GameId = b.GameId,
-//                         Type = b.Type,
-//                         TeamPickedID = b.TeamPickedID,
-//                         PlayerPickedID = b.PlayerPickedID,
-//                         UserId = b.UserId
-//                     })
-//                .FirstOrDefaultAsync(p => p.ID == id);
-
-//            if (betDTO == null)
-//                return NotFound();
-//            else
-//                return betDTO;
-
-//        }
-
-//        // PUT: api/Bet/5
-//        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-//        [HttpPut("{id}")]
-//        public async Task<IActionResult> PutBet(int id, Bet bet)
-//        {
-//            if (id != bet.ID)
-//            {
-//                return BadRequest();
-//            }
-
-//            _context.Entry(bet).State = EntityState.Modified;
-
-//            try
-//            {
-//                await _context.SaveChangesAsync();
-//            }
-//            catch (DbUpdateConcurrencyException)
-//            {
-//                if (!BetExists(id))
-//                {
-//                    return NotFound();
-//                }
-//                else
-//                {
-//                    throw;
-//                }
-//            }
-
-//            return NoContent();
-//        }
-
-//        // POST: api/Bet
-//        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-//        [HttpPost]
-//        public async Task<ActionResult<Bet>> PostBet(Bet bet)
-//        {
-//            _context.Bet.Add(bet);
-//            await _context.SaveChangesAsync();
-
-//            return CreatedAtAction("GetBet", new { id = bet.ID }, bet);
-//        }
-
-//        // DELETE: api/Bet/5
-//        [HttpDelete("{id}")]
-//        public async Task<IActionResult> DeleteBet(int id)
-//        {
-//            var bet = await _context.Bet.FindAsync(id);
-//            if (bet == null)
-//            {
-//                return NotFound();
-//            }
-
-//            _context.Bet.Remove(bet);
-//            await _context.SaveChangesAsync();
-
-//            return NoContent();
-//        }
-
-//        private bool BetExists(int id)
-//        {
-//            return _context.Bet.Any(e => e.ID == id);
-//        }
-//    }
-//}

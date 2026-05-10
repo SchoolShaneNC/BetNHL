@@ -11,6 +11,6 @@ public class ApplicationUser : IdentityUser
     public decimal TotalMoneyWon { get; set; } = 0;
     public decimal TotalMoneyLost { get; set; } = 0;
 
-    public List<Bet> Bets { get; set; } = new();
+    public List<Parlay> Parlays { get; set; } = new();
 }
 
