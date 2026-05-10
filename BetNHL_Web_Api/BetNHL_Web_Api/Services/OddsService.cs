@@ -117,6 +117,46 @@ namespace BetNHL_Web_Api.Services
             }
         }
 
+        //public decimal CalculateLegOdds(CreateParlayLegDTO leg)
+        //{
+        //    //// This method would contain logic to determine which odds calculation to use based on the leg's category and metric.
+        //    //// For example:
+        //    //if (leg.Category == BetCategory.Team && leg.Metric == BetMetric.Win)
+        //    //{
+        //    //    // You would need to fetch the relevant standings data for the teams involved in this leg.
+        //    //    // For demonstration, let's assume you have that data available as 'standings'.
+        //    //    List<NhlTeamStandingDTO> standings = FetchStandingsForGame(leg.GameId);
+        //    //    return CalculateTeamWinOdds(standings, leg.HomeAbbrev, leg.AwayAbbrev, leg.TeamPickedAbbr);
+        //    //}
+        //    //else if (leg.Category == BetCategory.Player && leg.Metric == BetMetric.TotalGoals)
+        //    //{
+        //    //    // You would need to fetch the relevant player stats for the player involved in this leg.
+        //    //    // For demonstration, let's assume you have that data available as 'player' and 'stats'.
+        //    //    NhlPlayerDTO player = FetchPlayer(leg.PlayerPickedID.Value);
+        //    //    NhlPlayerStatsDTO stats = FetchPlayerStats(leg.PlayerPickedID.Value);
+        //    //    return CalculatePlayerGoalOdds(player, stats);
+        //    //}
+        //    //// Default odds if we don't have specific logic for this type of leg
+        //    //return 3.00m;
+        //    return 3.00m; // Placeholder until we implement the actual logic
+        //}
+        public decimal CalculateLegOdds(CreateParlayLegDTO leg)
+        {
+            return 3.00m;
+        }
+
+        public decimal CalculateCombinedParlayOdds(List<decimal> odds)
+        {
+            decimal combinedOdds = 1.0m;
+
+            foreach (var odd in odds)
+            {
+                combinedOdds *= odd;
+            }
+
+            return Math.Round(combinedOdds, 2);
+        }
+
 
     }
 }

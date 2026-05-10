@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+﻿using System.Security.Claims;
+using BetNHL_Web_Api.Data;
+using BetNHL_Web_Api.Helpers;
+using BetNHL_Web_Api.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using BetNHL_Web_Api.Data;
-using BetNHL_Web_Api.Models;
-using Microsoft.CodeAnalysis.Scripting;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Authorization;
 
 namespace BetNHL_Web_Api.Controllers
 {
@@ -18,135 +14,132 @@ namespace BetNHL_Web_Api.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-    //    var user = await _userManager.Users
-    //.Include(u => u.Bets)
-    //.FirstOrDefaultAsync(u => u.Id == id);
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly BetNHLContext _context;
 
-        public UserController(UserManager<ApplicationUser> userManager)
+        public UserController(UserManager<ApplicationUser> userManager, BetNHLContext context)
         {
             _userManager = userManager;
+            _context = context;
         }
 
-        [Authorize]
+        // GET: api/User
         [HttpGet]
         public async Task<ActionResult<IEnumerable<UserDTO>>> GetUsers()
         {
             var users = await _userManager.Users
-                .Include(u => u.Bets)
+                .Include(u => u.Parlays)
+                    .ThenInclude(p => p.Legs)
+                .AsNoTracking()
                 .ToListAsync();
 
-            var userDTOs = users.Select(u => new UserDTO
-            {
-                ID = u.Id,
-                Username = u.UserName,
-                Balance = u.Balance,
-                BetsWon = u.BetsWon,
-                BetsLost = u.BetsLost,
-                TotalMoneyBet = u.TotalMoneyBet,
-                TotalMoneyWon = u.TotalMoneyWon,
-                TotalMoneyLost = u.TotalMoneyLost,
-
-                Bets = u.Bets.Select(b => new BetDTO
-                {
-                    ID = b.ID,
-                    DatePlaced = b.DatePlaced,
-                    AmountBet = b.AmountBet,
-                    Odds = b.Odds,
-                    Won = b.Won,
-                    GameId = b.GameId,
-                    Type = b.Type,
-                    TeamPickedID = b.TeamPickedID,
-                    PlayerPickedID = b.PlayerPickedID
-                }).ToList()
-            }).ToList();
+            var userDTOs = users
+                .Select(DTOMapper.MapUserDTO)
+                .ToList();
 
             return Ok(userDTOs);
         }
 
+        // GET: api/User/5
         [HttpGet("{id}")]
         public async Task<ActionResult<UserDTO>> GetUserByID(string id)
         {
             var user = await _userManager.Users
-                .Include(u => u.Bets)
+                .Include(u => u.Parlays)
+                    .ThenInclude(p => p.Legs)
+                .AsNoTracking()
                 .FirstOrDefaultAsync(u => u.Id == id);
 
             if (user == null)
-                return NotFound();
-
-            var dto = new UserDTO
             {
-                ID = user.Id,
-                Username = user.UserName,
-                Balance = user.Balance,
-                BetsWon = user.BetsWon,
-                BetsLost = user.BetsLost,
-                TotalMoneyBet = user.TotalMoneyBet,
-                TotalMoneyWon = user.TotalMoneyWon,
-                TotalMoneyLost = user.TotalMoneyLost,
-
-                Bets = user.Bets.Select(b => new BetDTO
+                return NotFound(new
                 {
-                    ID = b.ID,
-                    DatePlaced = b.DatePlaced,
-                    AmountBet = b.AmountBet,
-                    Odds = b.Odds,
-                    Won = b.Won,
-                    GameId = b.GameId,
-                    Type = b.Type,
-                    TeamPickedID = b.TeamPickedID,
-                    PlayerPickedID = b.PlayerPickedID
-                }).ToList()
-            };
+                    message = "User not found."
+                });
+            }
+
+            var dto = DTOMapper.MapUserDTO(user);
 
             return Ok(dto);
         }
 
-
+        // GET: api/User/me
         [HttpGet("me")]
         public async Task<ActionResult<UserDTO>> GetMyProfile()
         {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
 
             return await GetUserByID(userId);
         }
 
-
+        // GET: api/User/leaderboard
         [HttpGet("leaderboard")]
         public async Task<ActionResult<IEnumerable<UserDTO>>> GetLeaderboard()
         {
-            var users = await _userManager.Users.ToListAsync();
+            var leaderboard = await _context.Parlays
+                  .Where(p => p.Won != null)
+                  .GroupBy(p => p.UserId)
+                  .Select(g => new
+                  {
+                      UserId = g.Key,
 
-            var userDTOs = users.Select(u => new UserDTO
-            {
-                ID = u.Id,
-                Username = u.UserName,
-                Balance = u.Balance,
-                BetsWon = u.BetsWon,
-                BetsLost = u.BetsLost
-            })
-            .OrderByDescending(u => u.Balance)
-            .ToList();
+                      NetProfit = g.Sum(x =>
+                          x.Won == true
+                              ? x.PotentialPayout - x.Stake
+                              : -x.Stake),
 
-            return Ok(userDTOs);
+                      ParlaysWon = g.Count(x => x.Won == true),
+                      TotalParlays = g.Count(),
+
+                      WinRate = g.Count(x => x.Won == true) * 1.0 / g.Count()
+                  })
+                  .OrderByDescending(x => x.NetProfit)
+                  .ThenByDescending(x => x.WinRate)
+                  .ThenByDescending(x => x.ParlaysWon)
+                  .Take(50)
+                  .ToListAsync();
+
+            return Ok(leaderboard);
         }
 
-
-        [Authorize]
+        // DELETE: api/User/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(string id)
         {
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            // Optional safety check
+            if (currentUserId != id)
+            {
+                return Forbid();
+            }
+
             var user = await _userManager.FindByIdAsync(id);
+
             if (user == null)
-                return NotFound();
+            {
+                return NotFound(new
+                {
+                    message = "User not found."
+                });
+            }
 
             var result = await _userManager.DeleteAsync(user);
+
             if (!result.Succeeded)
-                return BadRequest(result.Errors);
+            {
+                return BadRequest(new
+                {
+                    errors = result.Errors.Select(e => e.Description)
+                });
+            }
 
             return NoContent();
         }
     }
-
 }
-

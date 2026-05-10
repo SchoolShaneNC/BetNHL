@@ -12,5 +12,9 @@ namespace BetNHL_Web_Api.Services
 
         decimal CalculatePlayerGoalOdds(NhlPlayerDTO player, NhlPlayerStatsDTO stats);
         string ConvertToDisplayOdds(decimal decimalOdds);
+
+
+        public decimal CalculateLegOdds(CreateParlayLegDTO leg);
+        public decimal CalculateCombinedParlayOdds(List<decimal> odds);
     }
 }

@@ -9,15 +9,18 @@ namespace BetNHL_Web_Api.Models
 
         public string Username { get; set; }
 
-        public string PasswordHash { get; set; }
         public int BetsWon { get; set; }
+
         public int BetsLost { get; set; }
 
-   
         public decimal Balance { get; set; }
+
         public decimal TotalMoneyBet { get; set; }
+
         public decimal TotalMoneyWon { get; set; }
+
         public decimal TotalMoneyLost { get; set; }
-        public List<BetDTO>? Bets { get; set; } = new List<BetDTO>();
+
+        public List<ParlayDTO>? Parlays { get; set; } = new();
     }
 }

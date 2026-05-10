@@ -163,28 +163,54 @@ namespace BetNHL_Web_Api.Data.MOMigrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Bets",
+                name: "Parlays",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    UserId = table.Column<string>(type: "TEXT", nullable: false),
+                    DatePlaced = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    Stake = table.Column<decimal>(type: "TEXT", precision: 18, scale: 2, nullable: false),
+                    CombinedOdds = table.Column<decimal>(type: "TEXT", precision: 18, scale: 4, nullable: false),
+                    PotentialPayout = table.Column<decimal>(type: "TEXT", precision: 18, scale: 2, nullable: false),
+                    Won = table.Column<bool>(type: "INTEGER", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Parlays", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Parlays_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ParlayLegs",
                 columns: table => new
                 {
                     ID = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    DatePlaced = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    AmountBet = table.Column<decimal>(type: "TEXT", nullable: false),
-                    Odds = table.Column<decimal>(type: "TEXT", nullable: false),
-                    Won = table.Column<bool>(type: "INTEGER", nullable: true),
+                    ParlayId = table.Column<int>(type: "INTEGER", nullable: false),
+                    Category = table.Column<string>(type: "TEXT", maxLength: 20, nullable: false),
+                    Metric = table.Column<string>(type: "TEXT", maxLength: 20, nullable: false),
+                    Condition = table.Column<string>(type: "TEXT", maxLength: 20, nullable: false),
+                    Context = table.Column<string>(type: "TEXT", maxLength: 20, nullable: false),
                     GameId = table.Column<int>(type: "INTEGER", nullable: false),
-                    UserID = table.Column<string>(type: "TEXT", nullable: false),
-                    Type = table.Column<int>(type: "INTEGER", nullable: false),
                     TeamPickedID = table.Column<int>(type: "INTEGER", nullable: true),
-                    PlayerPickedID = table.Column<int>(type: "INTEGER", nullable: true)
+                    PlayerPickedID = table.Column<int>(type: "INTEGER", nullable: true),
+                    Odds = table.Column<decimal>(type: "TEXT", precision: 18, scale: 4, nullable: false),
+                    Line = table.Column<decimal>(type: "TEXT", precision: 18, scale: 2, nullable: true),
+                    Won = table.Column<bool>(type: "INTEGER", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Bets", x => x.ID);
+                    table.PrimaryKey("PK_ParlayLegs", x => x.ID);
                     table.ForeignKey(
-                        name: "FK_Bets_AspNetUsers_UserID",
-                        column: x => x.UserID,
-                        principalTable: "AspNetUsers",
+                        name: "FK_ParlayLegs_Parlays_ParlayId",
+                        column: x => x.ParlayId,
+                        principalTable: "Parlays",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -227,9 +253,24 @@ namespace BetNHL_Web_Api.Data.MOMigrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Bets_UserID",
-                table: "Bets",
-                column: "UserID");
+                name: "IX_ParlayLegs_GameId",
+                table: "ParlayLegs",
+                column: "GameId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ParlayLegs_ParlayId",
+                table: "ParlayLegs",
+                column: "ParlayId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Parlays_UserId",
+                table: "Parlays",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Parlays_Won",
+                table: "Parlays",
+                column: "Won");
         }
 
         /// <inheritdoc />
@@ -251,10 +292,13 @@ namespace BetNHL_Web_Api.Data.MOMigrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "Bets");
+                name: "ParlayLegs");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
+
+            migrationBuilder.DropTable(
+                name: "Parlays");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");

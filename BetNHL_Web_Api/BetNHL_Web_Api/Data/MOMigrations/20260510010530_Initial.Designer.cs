@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BetNHL_Web_Api.Data.MOMigrations
 {
     [DbContext(typeof(BetNHLContext))]
-    [Migration("20260408025746_Initial")]
+    [Migration("20260510010530_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -102,23 +102,82 @@ namespace BetNHL_Web_Api.Data.MOMigrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("BetNHL_Web_Api.Models.Bet", b =>
+            modelBuilder.Entity("BetNHL_Web_Api.Models.Parlay", b =>
                 {
-                    b.Property<int>("ID")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<decimal>("AmountBet")
+                    b.Property<decimal>("CombinedOdds")
+                        .HasPrecision(18, 4)
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("DatePlaced")
                         .HasColumnType("TEXT");
 
+                    b.Property<decimal>("PotentialPayout")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("Stake")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool?>("Won")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("Won");
+
+                    b.ToTable("Parlays");
+                });
+
+            modelBuilder.Entity("BetNHL_Web_Api.Models.ParlayLeg", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Condition")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Context")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
                     b.Property<int>("GameId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<decimal>("Odds")
+                    b.Property<decimal?>("Line")
+                        .HasPrecision(18, 2)
                         .HasColumnType("TEXT");
+
+                    b.Property<string>("Metric")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("Odds")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("ParlayId")
+                        .HasColumnType("INTEGER");
 
                     b.Property<int?>("PlayerPickedID")
                         .HasColumnType("INTEGER");
@@ -126,21 +185,16 @@ namespace BetNHL_Web_Api.Data.MOMigrations
                     b.Property<int?>("TeamPickedID")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("Type")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("UserID")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
                     b.Property<bool?>("Won")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("ID");
 
-                    b.HasIndex("UserID");
+                    b.HasIndex("GameId");
 
-                    b.ToTable("Bets");
+                    b.HasIndex("ParlayId");
+
+                    b.ToTable("ParlayLegs");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -271,15 +325,26 @@ namespace BetNHL_Web_Api.Data.MOMigrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("BetNHL_Web_Api.Models.Bet", b =>
+            modelBuilder.Entity("BetNHL_Web_Api.Models.Parlay", b =>
                 {
                     b.HasOne("ApplicationUser", "User")
-                        .WithMany("Bets")
-                        .HasForeignKey("UserID")
+                        .WithMany("Parlays")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("BetNHL_Web_Api.Models.ParlayLeg", b =>
+                {
+                    b.HasOne("BetNHL_Web_Api.Models.Parlay", "Parlay")
+                        .WithMany("Legs")
+                        .HasForeignKey("ParlayId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Parlay");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -335,7 +400,12 @@ namespace BetNHL_Web_Api.Data.MOMigrations
 
             modelBuilder.Entity("ApplicationUser", b =>
                 {
-                    b.Navigation("Bets");
+                    b.Navigation("Parlays");
+                });
+
+            modelBuilder.Entity("BetNHL_Web_Api.Models.Parlay", b =>
+                {
+                    b.Navigation("Legs");
                 });
 #pragma warning restore 612, 618
         }
