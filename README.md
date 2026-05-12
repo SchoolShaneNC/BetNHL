@@ -1,4 +1,4 @@
-
+````markdown
 # BetNHL
 
 A modern NHL betting analytics platform built with C# and .NET that delivers real-time hockey insights, matchup analysis, statistical modeling, and betting-focused data through a scalable web API architecture.
@@ -63,6 +63,7 @@ Built entirely in C#, the project emphasizes scalability, maintainability, and p
 
 # Project Structure
 
+```text
 BetNHL/
 │
 ├── BetNHL/
@@ -79,6 +80,8 @@ BetNHL/
 │
 ├── ShanesBetNHL.sln
 └── README.md
+````
+
 ---
 
 # Getting Started
