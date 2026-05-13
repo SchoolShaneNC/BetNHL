@@ -140,12 +140,14 @@ namespace BetNHL_Web_Api.Models
                     new[] { nameof(Condition) });
             }
 
-            // Multi only valid for goals currently
+            // Multi only valid for stat accumulation metrics
             if (Condition == BetCondition.Multi &&
-                Metric != BetMetric.Goal)
+                Metric != BetMetric.Goal &&
+                Metric != BetMetric.Assist &&
+                Metric != BetMetric.Point)
             {
                 yield return new ValidationResult(
-                    "Multi condition currently only applies to goals.",
+                    "Multi condition only applies to goals, assists, or points.",
                     new[] { nameof(Condition) });
             }
         }

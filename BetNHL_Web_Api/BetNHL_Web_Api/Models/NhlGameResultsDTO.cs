@@ -25,9 +25,16 @@
     {
         public List<GoalDTO> Goals { get; set; }
     }
+    
 
     public class GoalDTO
     {
         public int PlayerId { get; set; }
+
+        public List<int> AssistPlayerIds { get; set; } = new();
+
+        public string Strength { get; set; } = string.Empty;
+
+        public int Period { get; set; }
     }
 }

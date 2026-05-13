@@ -113,6 +113,16 @@ namespace BetNHL_Web_Api.Models
                         "Game total bets must be Over or Under.",
                         new[] { nameof(Condition) });
                 }
+
+                // Over/Under requires a line
+                if ((Condition == BetCondition.Over ||
+                     Condition == BetCondition.Under) &&
+                    !Line.HasValue)
+                {
+                    yield return new ValidationResult(
+                        "Over/Under bets require a line.",
+                        new[] { nameof(Line) });
+                }
             }
 
             // Powerplay validation
@@ -145,13 +155,32 @@ namespace BetNHL_Web_Api.Models
                     new[] { nameof(Condition) });
             }
 
-            // Multi only valid for goals currently
+            // Multi only valid for stat accumulation metrics
             if (Condition == BetCondition.Multi &&
-                Metric != BetMetric.Goal)
+                Metric != BetMetric.Goal &&
+                Metric != BetMetric.Assist &&
+                Metric != BetMetric.Point)
             {
                 yield return new ValidationResult(
-                    "Multi condition currently only applies to goals.",
+                    "Multi condition only applies to goals, assists, or points.",
                     new[] { nameof(Condition) });
+            }
+
+            // Multi requires a line
+            if (Condition == BetCondition.Multi)
+            {
+                if (!Line.HasValue)
+                {
+                    yield return new ValidationResult(
+                        "Multi bets require a line.",
+                        new[] { nameof(Line) });
+                }
+                else if (Line < 2)
+                {
+                    yield return new ValidationResult(
+                        "Multi line must be at least 2.",
+                        new[] { nameof(Line) });
+                }
             }
         }
 

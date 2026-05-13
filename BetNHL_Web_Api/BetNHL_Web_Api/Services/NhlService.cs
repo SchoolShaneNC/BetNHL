@@ -228,10 +228,34 @@ namespace BetNHL_Web_Api.Services
 
                 foreach (var goal in goals.EnumerateArray())
                 {
-                    periodDTO.Goals.Add(new GoalDTO
+                    var goalDto = new GoalDTO
                     {
-                        PlayerId = goal.GetProperty("playerId").GetInt32()
-                    });
+                        PlayerId = goal.GetProperty("playerId").GetInt32(),
+
+                        Strength = goal.TryGetProperty("strength", out var strength)
+                            ? strength.GetString() ?? string.Empty
+                            : string.Empty,
+
+                        Period = period
+                            .GetProperty("periodDescriptor")
+                            .GetProperty("number")
+                            .GetInt32()
+                    };
+
+                    // Parse assists
+                    if (goal.TryGetProperty("assists", out var assists))
+                    {
+                        foreach (var assist in assists.EnumerateArray())
+                        {
+                            if (assist.TryGetProperty("playerId", out var assistPlayerId))
+                            {
+                                goalDto.AssistPlayerIds.Add(
+                                    assistPlayerId.GetInt32());
+                            }
+                        }
+                    }
+
+                    periodDTO.Goals.Add(goalDto);
                 }
 
                 gameResult.Summary.Scoring.Add(periodDTO);
